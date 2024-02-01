@@ -1,23 +1,30 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from Coordinates import pixels_coordinates
-from Coordinates import adjacent_pixels
+from Coordinates import pixels_coordinates, adjacent_pixels, get_upper_edge_pixels, sort_pixels_by_adjacency, get_all_edges
 
-data = pixels_coordinates('final.png')
-coordinates, counter = adjacent_pixels(data)
+# Load pixel coordinates
+pixel_coordinates = pixels_coordinates('final.png')
 
-# Flatten and reshape the list of lists
-flat_list = [item for sublist in coordinates for item in sublist]
-coordinates_array = np.array(flat_list)
+# Get adjacent pixels
+adjacent_pixels = adjacent_pixels(pixel_coordinates)
 
-# Rotation matrices
-rotation_matrix = np.array([[-1, 0], [0, -1]])
-rotation_matrix2 = np.array([[-1, 0], [0, 1]])
+result = []
+for edge in adjacent_pixels:
+    upper_pixels = get_upper_edge_pixels(edge)
+    sorted_pixels = sort_pixels_by_adjacency(upper_pixels)
+    edges = get_all_edges(sorted_pixels)
+    result.extend(edges)  # Extend result with edges
 
-# Apply the rotation to each coordinate
-rotated_coordinates = np.dot(coordinates_array, rotation_matrix)
-rotated_coordinates2 = np.dot(rotated_coordinates, rotation_matrix2)
+# You don't need to flatten the result if each edge is already a list of coordinates
+for edge in result:
+    coordinates_array = np.array(edge)
 
-# Use rotated coordinates for plotting
-plt.scatter(rotated_coordinates2[:, 0], rotated_coordinates2[:, 1], color="black", s=0.1)
+    # If you need to apply a rotation
+    rotation_matrix = np.array([[-1, 0], [0, -1]])  # Modify as per your requirement
+    rotated_coordinates = np.dot(coordinates_array, rotation_matrix)
+
+    # Plotting
+    plt.scatter(rotated_coordinates[:, 0], rotated_coordinates[:, 1], color="black", s=0.1)
+
 plt.show()
+print(len(result))
